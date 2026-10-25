@@ -1,0 +1,9 @@
+# 忽略：本机运行产物与私有笔记，不进仓库
+node_modules/
+backup/
+test-home/
+test/
+*.log
+.DS_Store
+Thumbs.db
+README-DEV.md
