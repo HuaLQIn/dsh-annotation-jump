@@ -59,30 +59,51 @@ Select assistant text ──▶ Toolbar "Annotate" ──▶ Write note / save e
     Model reply: Annotation 1: … Annotation 2: … (hoverable chips)
 ```
 
-## Install (official bundle path · the only one)
+## Install
+
+**This fork is not published on npm.** Install it straight from this repository:
 
 ```sh
-# Public npm package (works without an npm account)
-dsh plugin --profile web add @changfenhuang/dsh-annotation
-# Or install directly from the public GitHub source
-dsh plugin --profile web add git+https://github.com/omdsh-dev/dsh-annotation.git
-# local path install (development / debugging)
-cd /path/to/dsh-annotation
-dsh plugin --profile web add .
-# restart the web service — see "Restarting the web service" below
+# recommended — install from this repository
+dsh plugin --profile <your-profile> add git+https://github.com/HuaLQIn/dsh-annotation-jump.git
+
+# or — clone, then install from a local path (development / debugging)
+git clone https://github.com/HuaLQIn/dsh-annotation-jump.git
+cd dsh-annotation-jump
+dsh plugin --profile <your-profile> add .
+
+# then restart the web service — see "Restarting the web service" below
 ```
 
-To add it only as a Node dependency in an existing project:
+`<your-profile>` is the profile you actually run: `web` for the browser build, `desktop` for the desktop app.
+
+### Package name, and why the npm package is not this fork
+
+This fork keeps the upstream package name `@changfenhuang/dsh-annotation` on purpose, so that swapping it into an existing DSH install does not break anything.
+
+Two consequences, both important:
+
+- `dsh plugin add @changfenhuang/dsh-annotation` or `npm install @changfenhuang/dsh-annotation` pulls the **upstream 1.4.x release from npm**, not this fork. You will not get the chip-jump feature that way.
+- Because the package name is the same, **this fork and the upstream version cannot be installed side by side** — they overwrite each other.
+
+### Requirements
+
+- Node.js **20 or newer** (`engines.node` in `package.json`).
+- A DSH build that provides `cordis` 4.x (`peerDependencies`).
+
+### Uninstall
 
 ```sh
-npm install @changfenhuang/dsh-annotation
+dsh plugin --profile <your-profile> remove @changfenhuang/dsh-annotation
 ```
 
-> `npm install` only adds the dependency; it does not register the plugin with DSH. Use `dsh plugin add` above when installing it into DSH.
+Then restart the web service. Annotation state lives in the browser's `localStorage` under keys starting with `dsh.annotation.`; uninstalling does not clear it, and you can delete those keys from the browser console if you want a clean slate.
 
 ### Migrating from the old `@omdsh-dev` package name
 
 If you installed the plugin before v1.4.2, remove the old dependency before installing the renamed package:
+
+> In this fork, replace the second command with the git install command above — the npm package name installs upstream, not this fork.
 
 ```sh
 dsh plugin --profile web remove @omdsh-dev/dsh-annotation

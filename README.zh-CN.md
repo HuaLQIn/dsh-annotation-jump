@@ -59,30 +59,51 @@
    模型回复：Annotation 1：… Annotation 2：…（可悬浮芯片）
 ```
 
-## 安装（官方 bundle 路径 · 唯一）
+## 安装
+
+**本改造版没有发布到 npm**，直接从本仓库安装：
 
 ```sh
-# npm 公开包安装（无需 npm 账号）
-dsh plugin --profile web add @changfenhuang/dsh-annotation
-# 也可以直接从 GitHub 公开源码安装
-dsh plugin --profile web add git+https://github.com/omdsh-dev/dsh-annotation.git
-# 本地路径安装（开发调试）
-cd /path/to/dsh-annotation
-dsh plugin --profile web add .
-# 重启 web —— 见下方「重启 web 服务」
+# 推荐：从本仓库安装
+dsh plugin --profile <你的 profile> add git+https://github.com/HuaLQIn/dsh-annotation-jump.git
+
+# 或者：克隆后按本地路径安装（开发调试）
+git clone https://github.com/HuaLQIn/dsh-annotation-jump.git
+cd dsh-annotation-jump
+dsh plugin --profile <你的 profile> add .
+
+# 然后重启 web 服务 —— 见下方「重启 web 服务」
 ```
 
-如果只想把它作为 Node 依赖加入现有项目：
+`<你的 profile>` 填你实际在用的那个：浏览器版一般是 `web`，桌面版是 `desktop`。
+
+### 包名，以及为什么 npm 上的不是本改造版
+
+本改造版**故意沿用上游包名** `@changfenhuang/dsh-annotation`，这样把它换进已有的 DSH 安装时不会因为改名而出问题。
+
+两个后果都要知道：
+
+- 执行 `dsh plugin add @changfenhuang/dsh-annotation` 或 `npm install @changfenhuang/dsh-annotation`，装到的是**npm 上的上游 1.4.x**，不是本改造版，拿不到芯片跳转功能。
+- 因为包名相同，**本改造版不能和上游版本同时安装**，两者会互相覆盖。
+
+### 运行要求
+
+- Node.js **20 或更高**（见 `package.json` 的 `engines.node`）。
+- 提供 `cordis` 4.x 的 DSH 版本（见 `peerDependencies`）。
+
+### 卸载
 
 ```sh
-npm install @changfenhuang/dsh-annotation
+dsh plugin --profile <你的 profile> remove @changfenhuang/dsh-annotation
 ```
 
-> `npm install` 只添加依赖，不会把插件注册到 DSH；在 DSH 中使用时仍应执行上面的 `dsh plugin add`。
+然后重启 web 服务。批注数据存在浏览器的 `localStorage` 里，键名以 `dsh.annotation.` 开头；卸载不会清掉它们，想要干净状态可以在浏览器控制台里删掉这些键。
 
 ### 从旧 `@omdsh-dev` 包名迁移
 
 如果你在 v1.4.2 之前安装过插件，请先删除旧依赖，再安装改名后的包：
+
+> 在本改造版里，第二条命令请换成上面那条从本仓库 git 安装的命令——npm 上的同名包是上游原版，不是本改造版。
 
 ```sh
 dsh plugin --profile web remove @omdsh-dev/dsh-annotation
