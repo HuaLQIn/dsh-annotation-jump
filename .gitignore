@@ -4,6 +4,8 @@ backup/
 test-home/
 test/
 *.log
+client.js.bak-*
+package.json.bak-*
 .DS_Store
 Thumbs.db
 README-DEV.md

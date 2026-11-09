@@ -1,6 +1,6 @@
-> **改造版说明** —— 本项目是 [dsh-annotation](https://github.com/omdsh-dev/dsh-annotation)（作者 **omdsh-dev**，MIT，Copyright (c) 2026 omdsh-dev）的**修改版**，**不是原创**，也不代表原作者背书。署名与改动清单见 [CREDITS.md](CREDITS.md)。1.5.0 的改动是：**点回复里的 `Annotation N` 芯片，跳回被批注的原文**（文本锚定位，刷新后仍可跳；平滑滚动 + 短暂高亮）。
+> **改造版说明** —— 本项目是 [dsh-annotation](https://github.com/omdsh-dev/dsh-annotation)（作者 **omdsh-dev**，MIT，Copyright (c) 2026 omdsh-dev）的**修改版**，**不是原创**，也不代表原作者背书。署名与改动清单见 [CREDITS.md](CREDITS.md)。1.5.0 的改动是：**点回复里的 `Annotation N` 芯片，跳回被批注的原文**（文本锚定位，刷新后仍可跳；平滑滚动 + 短暂高亮）。1.6.0 修的是这套跳转的观感：高亮每帧跟随原文不再漂移、点完立刻关掉悬浮面板、提示条移到输入面板上方、标记条滚出对话区即消失；悬浮面板里的提示也改成了真按钮。
 >
-> **维护者** HuaLQIn · **修改日期** 2026-10-24（基线：上游 1.4.11）。
+> **维护者** HuaLQIn · **修改日期** 2026-11-09（基线：上游 1.4.11）。
 > **问题该提到哪**：由本改造引入的问题（1.5.0 的芯片跳转等）提到本仓库；原版就有的问题请提到上游，别占用本仓库的 issue。
 > **安装冲突**：本改造版沿用上游包名 `@changfenhuang/dsh-annotation`，**不要同时安装两者**，会互相覆盖。
 # dsh-annotation

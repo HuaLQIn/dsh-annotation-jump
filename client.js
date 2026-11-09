@@ -1,4 +1,4 @@
-﻿// annotation-for-dsh 的浏览器端 half（client bundle）。
+// annotation-for-dsh 的浏览器端 half（client bundle）。
 //
 // 手写 CJS + ModuleLoader 包装（同 omdsh-dev navbar/greeter 模式，零构建
 // 步骤）：纯 DOM 自渲染，无任何 @deepseek-ai 值导入（bundle purity gate 合规）；
@@ -152,7 +152,7 @@ window.__ModuleLoader__.load({
         // 标注色：原来是琥珀黄 15%，在深色底上叠出橄榄绿、发脏。改成主题蓝的低透明
         // 淡染 + 一条 1px 底边，跟蓝色编号同一色系，也不跟正文抢视线。
         '.dsh-ann-hl { position: fixed; z-index: 900; background: rgba(76, 154, 255, .36);',
-        '  border-radius: 2px; pointer-events: none;',
+        '  border-radius: 5px; pointer-events: none;',
         '  box-shadow: inset 0 -1px 0 rgba(76, 154, 255, .90);',
         '  animation: dsh-ann-fadein .15s ease; }',
         '.dsh-ann-num { position: fixed; z-index: 940; display: inline-flex; align-items: center;',
@@ -167,14 +167,13 @@ window.__ModuleLoader__.load({
         // React 重渲染不会把它卷进去），1.4s 后整层清空。
         '[data-annotation-flash-layer] { position: fixed; inset: 0; z-index: 960;',
         '  pointer-events: none; }',
-        '.dsh-ann-flash { position: fixed; border-radius: 3px;',
-        '  background: rgba(76, 154, 255, .42);',
-        '  box-shadow: inset 0 0 0 1px rgba(76, 154, 255, .80);',
-        '  animation: dsh-ann-jump .85s ease-out both; }',
+        '.dsh-ann-flash { position: fixed; border-radius: 5px;',
+        '  background: rgba(76, 154, 255, .5);',
+        '  box-shadow: inset 0 0 0 1px rgba(76, 154, 255, .95);',
+        '  animation: dsh-ann-jump 2.2s ease-out both; }',
         '@keyframes dsh-ann-jump {',
         '  0% { opacity: 1; }',
-        '  45% { opacity: .25; }',
-        '  72% { opacity: 1; }',
+        '  70% { opacity: 1; }',
         '  100% { opacity: 0; } }',
         'body:has([role="dialog"][aria-modal="true"]) [data-annotation-overlay],',
         'body:has([role="dialog"][aria-modal="true"]) [data-annotation-num-layer],',
@@ -216,6 +215,7 @@ window.__ModuleLoader__.load({
           notePrefix: '你的批注：',
           jumpTitle: '点击回到被批注的原文',
           jumpHint: '点击回到原文',
+          jumpAction: '跳到原文',
         },
         toast: {
           attachFail: '批注拼稿失败，消息将不带批注发送：',
@@ -224,6 +224,7 @@ window.__ModuleLoader__.load({
           jumpMissing: '没找到被批注的原文（可能已被修改，或不在当前会话里）',
           jumpMissingText: '被批注的那条消息在，但这段原文已经变了，定位不到',
           jumpHidden: '原文在折叠的区块里，先展开那条消息就能看到',
+          jumpLanded: '已跳到第 {n} 条批注的原文',
         },
         block: {
           head: '我批注了以下 {n} 处内容（编号与原文对应），请针对它们回答我的问题：',
@@ -258,6 +259,7 @@ window.__ModuleLoader__.load({
           notePrefix: 'Your note: ',
           jumpTitle: 'Click to jump back to the annotated passage',
           jumpHint: 'Click to jump to the source',
+          jumpAction: 'Jump to source',
         },
         toast: {
           attachFail: 'Failed to attach annotations; the message will be sent without them: ',
@@ -266,6 +268,7 @@ window.__ModuleLoader__.load({
           jumpMissing: 'The annotated passage was not found (it may have changed or belong to another session)',
           jumpMissingText: 'The annotated message is here, but that passage changed, so it cannot be located',
           jumpHidden: 'The passage sits in a collapsed block — expand that message to see it',
+          jumpLanded: 'Jumped to the source of annotation {n}',
         },
         block: {
           head: 'I annotated the following {n} passage(s) (the numbers match the quotes below); please respond to them when answering my question:',
@@ -303,6 +306,7 @@ window.__ModuleLoader__.load({
           missing: '(подходящая аннотация не найдена)',
           jumpTitle: 'Нажмите, чтобы вернуться к аннотированному фрагменту',
           jumpHint: 'Нажмите, чтобы вернуться к тексту',
+          jumpAction: 'Перейти к тексту',
         },
         toast: {
           attachFail: 'Не удалось собрать аннотации; сообщение уйдёт без них: ',
@@ -310,6 +314,7 @@ window.__ModuleLoader__.load({
           jumpMissing: 'Аннотированный фрагмент не найден (возможно, он изменён или из другого сеанса)',
           jumpMissingText: 'Сообщение найдено, но текст фрагмента изменился — точное место не определить',
           jumpHidden: 'Фрагмент находится в свёрнутом блоке — разверните это сообщение',
+          jumpLanded: 'Переход к аннотации {n}',
         },
         // Разбор блока опирается на три вещи: заголовок начинается с BLOCK_HEADS.ru,
         // разделитель вопроса — block.marker, префикс примечания — notePrefix.
@@ -1205,7 +1210,9 @@ window.__ModuleLoader__.load({
           var el = document.createElement('div')
           el.setAttribute('data-annotation-toast', '')
           el.textContent = msg
-          el.style.cssText = 'position:fixed;z-index:1300;left:50%;bottom:88px;transform:translateX(-50%);max-width:min(420px,calc(100vw - 24px));padding:8px 14px;border-radius:10px;background:var(--dsw-alias-bg-layer-2, var(--dsw-alias-bg-base, #2c2c2e));border:1px solid var(--dsw-alias-border-inverted);box-shadow:var(--dsw-shadow-lv3);color:var(--dsw-alias-label-primary);font-family:var(--dsw-font-family,system-ui);font-size:12px;pointer-events:none;'
+          // 提示条要落在输入面板上方：贴在底部 88px 时会被输入框整块盖住，
+          // 看起来就是「跳转了但没有任何提示」。168px 是输入面板顶沿之上的位置。
+          el.style.cssText = 'position:fixed;z-index:1300;left:50%;bottom:168px;transform:translateX(-50%);max-width:min(420px,calc(100vw - 24px));padding:8px 14px;border-radius:10px;background:var(--dsw-alias-bg-layer-2, var(--dsw-alias-bg-base, #2c2c2e));border:1px solid var(--dsw-alias-border-inverted);box-shadow:var(--dsw-shadow-lv3);color:var(--dsw-alias-label-primary);font-family:var(--dsw-font-family,system-ui);font-size:12px;pointer-events:none;'
           document.body.appendChild(el)
           if (toastTimer !== null) clearTimeout(toastTimer)
           toastTimer = setTimeout(function () {
@@ -1679,20 +1686,32 @@ window.__ModuleLoader__.load({
         var view = document.querySelector('[data-conversation-scroll]')
         var r = view !== null && typeof view.getBoundingClientRect === 'function'
           ? view.getBoundingClientRect() : null
-        if (r === null || r.width <= 0) {
+        if (r === null || r.width <= 0 || r.height <= 0) {
+          // 兜底⓪：宿主没给标记属性时，从消息行往上找真正在滚的那个容器。
+          var rows = allMessageRows()
+          for (var k = 0; k < rows.length; k++) {
+            var sc = scrollerOf(rows[k])
+            if (sc === null) continue
+            var sr = sc.getBoundingClientRect()
+            if (sr.width > 0 && sr.height > 0) {
+              return { left: sr.left, right: sr.right, top: sr.top, bottom: sr.bottom }
+            }
+          }
           var rects = hostLocalRects('scrollBody')
           if (rects.length === 0) return null
           var left = Infinity
           var right = -Infinity
           var top = Infinity
+          var bottom = -Infinity
           for (var i = 0; i < rects.length; i++) {
             left = Math.min(left, rects[i].left)
             right = Math.max(right, rects[i].right)
             top = Math.min(top, rects[i].top)
+            bottom = Math.max(bottom, rects[i].bottom)
           }
-          return { left: left, right: right, top: top }
+          return { left: left, right: right, top: top, bottom: bottom }
         }
-        return { left: r.left, right: r.right, top: r.top }
+        return { left: r.left, right: r.right, top: r.top, bottom: r.bottom }
       }
 
       /** 会盖住会话内容的宿主头部：标记层是 fixed 定位，原生绘制顺序上恒在
@@ -1750,9 +1769,19 @@ window.__ModuleLoader__.load({
         return out
       }
 
-      /** 外框保留、逐个矩形挖空（evenodd）：标记层的裁剪路径。 */
-      function clipWithHoles(rects) {
-        var d = 'polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0'
+      /** 外框保留、逐个矩形挖空（evenodd）：标记层的裁剪路径。
+       *  `bounds` = 会话正文可视矩形；不传则整幅视口。给了 bounds 之后，
+       *  标记层只在正文区里出现——原文滚出正文区（滚到顶部工具栏上方、
+       *  滚到输入区下方）时色块随之消失，不会继续浮在视口上。 */
+      function clipWithHoles(rects, bounds) {
+        var b = bounds !== null && bounds !== undefined
+          ? bounds
+          : { left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight }
+        var d = 'polygon(evenodd, ' + b.left + 'px ' + b.top + 'px, '
+          + b.right + 'px ' + b.top + 'px, '
+          + b.right + 'px ' + b.bottom + 'px, '
+          + b.left + 'px ' + b.bottom + 'px, '
+          + b.left + 'px ' + b.top + 'px'
         for (var i = 0; i < rects.length; i++) {
           var r = rects[i]
           d += ', ' + r.left + 'px ' + r.top + 'px, ' + r.right + 'px ' + r.top + 'px, '
@@ -1765,7 +1794,12 @@ window.__ModuleLoader__.load({
       function renderMarkers() {
         // 对整个标记层挖去输入区与会话头部区域；滚动、尺寸变化时即使原文没动也要刷新。
         var holes = hostComposerRects().concat(hostHeaderRects())
-        overlay.style.clipPath = holes.length > 0 ? clipWithHoles(holes) : 'none'
+        // #78：外框收到会话正文可视矩形——标记层是 fixed 定位、不参与宿主裁剪，
+        // 原文滚出正文区后色块仍会浮在视口上（用户看到的「滚到上面还留着」）。
+        var bounds = conversationColumnRange()
+        overlay.style.clipPath = (holes.length > 0 || bounds !== null)
+          ? clipWithHoles(holes, bounds)
+          : 'none'
         // 编号层用同一条裁剪路径兜底：编号只允许出现在会话内容可视区里，
         // 绝不压在输入框或会话头部之上（定位逻辑已先让位/隐藏，这里是保险）。
         numLayer.style.clipPath = overlay.style.clipPath
@@ -1782,6 +1816,10 @@ window.__ModuleLoader__.load({
       function buildMarkers() {
         if (ui.quotes.length === 0) return
         var placed = []
+        // #78：只画落在会话正文可视矩形里的色块。裁剪路径在某些视图下取不到
+        // 正文容器（或宿主结构变了），裁不住就会把色块留在视口上方的空白处——
+        // 这里先按几何位置挡一道，不依赖 CSS 裁剪一定能用。
+        var col = conversationColumnRange()
         for (var i = 0; i < ui.quotes.length; i++) {
           var q = ui.quotes[i]
           var range = locateQuote(q.text, q)
@@ -1790,6 +1828,8 @@ window.__ModuleLoader__.load({
           for (var c = 0; c < rects.length; c++) {
             var rect = rects[c]
             if (rect.width === 0 || rect.height === 0) continue
+            if (col !== null && col.bottom !== undefined
+              && (rect.bottom < col.top + 1 || rect.top > col.bottom - 1)) continue
             var hl = document.createElement('div')
             hl.className = 'dsh-ann-hl'
             hl.style.left = rect.left + 'px'
@@ -2808,25 +2848,59 @@ window.__ModuleLoader__.load({
       /** 闪一下：铺在选区矩形上的浮层，不碰正文 DOM，React 重渲染不会把它卷走。
        *  用户重新滚动时立刻撤掉——固定定位的色块不跟着正文走，留着就是「蓝色残影」。*/
       function flashRange(range, saved) {
-        var rects = quoteRects(range, saved || {})
-        flashLayer.textContent = ''
-        for (var i = 0; i < rects.length; i++) {
-          var r = rects[i]
-          if (r.width < 1 || r.height < 1) continue
-          var box = document.createElement('div')
-          box.className = 'dsh-ann-flash'
-          box.style.left = r.left + 'px'
-          box.style.top = r.top + 'px'
-          box.style.width = r.width + 'px'
-          box.style.height = r.height + 'px'
-          flashLayer.appendChild(box)
+        var valid = function (list) {
+          var out = []
+          for (var i = 0; i < list.length; i++) {
+            if (list[i].width >= 1 && list[i].height >= 1) out.push(list[i])
+          }
+          return out
         }
-        flashGuardUntil = Date.now() + 120
+        var boxes = []
+        // 元素数量不变就复用，只改位置：重建会让 CSS 动画重播，看起来在闪。
+        function layout(rects) {
+          if (boxes.length !== rects.length) {
+            flashLayer.textContent = ''
+            boxes = []
+            for (var i = 0; i < rects.length; i++) {
+              var box = document.createElement('div')
+              box.className = 'dsh-ann-flash'
+              flashLayer.appendChild(box)
+              boxes.push(box)
+            }
+          }
+          for (var j = 0; j < rects.length; j++) {
+            boxes[j].style.left = rects[j].left + 'px'
+            boxes[j].style.top = rects[j].top + 'px'
+            boxes[j].style.width = rects[j].width + 'px'
+            boxes[j].style.height = rects[j].height + 'px'
+          }
+        }
+        layout(valid(quoteRects(range, saved || {})))
+        // 盯住原文：滚动、图片撑开、代码块高亮都会让矩形变。以前只在估算的
+        // 时刻算一次，之后任何位移都成了「漂移」；改成每帧比对，变了就挪，
+        // 色块始终贴着字走，直到淡出。
+        var followUntil = Date.now() + 2200
+        var lastSig = ''
+        function follow() {
+          if (Date.now() > followUntil) return
+          var rects = valid(quoteRects(range, saved || {}))
+          var parts = []
+          for (var i = 0; i < rects.length; i++) {
+            parts.push(Math.round(rects[i].left) + ',' + Math.round(rects[i].top)
+              + ',' + Math.round(rects[i].width) + ',' + Math.round(rects[i].height))
+          }
+          var sig = parts.join('|')
+          if (sig !== lastSig) { lastSig = sig; layout(rects) }
+          requestAnimationFrame(follow)
+        }
+        follow()
+        // 保护窗覆盖整段平滑滚动：跳转自己触发的那段滚动不该把刚画的高亮撤掉。
+        flashGuardUntil = Date.now() + 1500
         if (flashTimer !== null) clearTimeout(flashTimer)
         flashTimer = setTimeout(function () {
           flashTimer = null
           flashLayer.textContent = ''
-        }, 1000)
+        }, 2200)
       }
 
       /** 用户一滚动就撤掉高亮：固定定位色块不跟正文走，留着就是「蓝色残影」。 */
@@ -2835,9 +2909,7 @@ window.__ModuleLoader__.load({
         if (flashLayer.childNodes.length > 0) flashLayer.textContent = ''
       }
       function onFlashScroll() {
-        if (flashLayer.childNodes.length === 0) return
-        if (Date.now() < flashGuardUntil) return
-        clearFlash()
+        // 高亮现在每帧跟着原文走，不会留下残影：滚动时不需要撤掉它。
       }
       window.addEventListener('scroll', onFlashScroll, true)
 
@@ -2940,8 +3012,12 @@ window.__ModuleLoader__.load({
       }
 
       /** 点芯片的主流程：定位 → 滚动 → 闪高亮；任何一步落空都给提示。 */
-      function jumpToItem(item, chip) {
-        clearTip(chip)
+      function jumpToItem(item, chip, num) {
+        // 无条件收掉浮层：这里不能只清「自己的」那一个。跳转会把页面滚走，浮层
+        // 被滚动带到指针底下时，「指针还在浮层里」这条保持条件会一直成立，
+        // 于是浮层永远不消失（有时有时没有，取决于滚完浮层落在哪）。
+        releaseActiveTip()
+        clearTip()
         var quote = quoteTextOf(item)
         if (quote.replace(/\s+/g, '') === '') { showToast(t('toast.jumpMissing')); return }
         var saved = anchorOfItem(item)
@@ -2949,13 +3025,14 @@ window.__ModuleLoader__.load({
           if (range === null || range === undefined) { showToast(t('toast.jumpMissing')); return }
           var rect = range.getBoundingClientRect()
           var hidden = rect.width === 0 || rect.height === 0
-          // 平滑滚完再画高亮：动画途中画会把色块留在旧坐标上（用户看到的蓝色残影）。
+          // 立刻画、然后交给 flashRange 自己每帧跟着原文走：点下去就看得见，
+          // 滚动和布局稳定过程中色块贴着字一起动，不会落后成「漂移」。
+          if (!hidden) flashRange(range, saved)
           centerRange(range, function () {
-            var now = range.getBoundingClientRect()
-            if (now.width > 0 && now.height > 0) flashRange(range, saved)
             // 定位成功但矩形塌成 0（原文在折叠/隐藏区块里）：滚过去了但什么也看不见，
             // 必须说一句，否则就是「点了没反应」。
             if (hidden) showToast(t('toast.jumpHidden'))
+            else showToast(t('toast.jumpLanded', { n: num === undefined ? '' : num }))
           })
         }
         // ① 文件预览里的批注：定位在预览器正文里，不涉及消息加载。
@@ -3075,10 +3152,19 @@ window.__ModuleLoader__.load({
             note.textContent = t('reply.notePrefix') + truncate(item.note, 80)
             el.appendChild(note)
           }
-          var hint = document.createElement('div')
-          hint.style.cssText = 'font-size:10px;color:var(--dsw-alias-label-dimmed);margin-top:6px;'
-          hint.textContent = t('reply.jumpHint')
-          el.appendChild(hint)
+          // 这行原来只是纯文字提示（「点击回到原文」）。浮层本身可交互（鼠标移进来
+          // 不会被关掉），用户很自然就去点这行字——点上去什么都不发生，弹层还挂着，
+          // 表现就是「点了出 bug」。改成真正的按钮：点它和点芯片是同一个动作。
+          var jumpBtn = document.createElement('button')
+          jumpBtn.type = 'button'
+          jumpBtn.style.cssText = 'margin-top:8px;display:inline-flex;align-items:center;height:22px;padding:0 10px;border-radius:6px;border:1px solid var(--dsw-alias-border-inverted);background:var(--dsw-alias-bg-layer-1, var(--dsw-alias-bg-base, #2c2c2e));color:var(--dsw-alias-text-accent,#4c9aff);font-family:var(--dsw-font-family,system-ui);font-size:11px;font-weight:600;cursor:pointer;'
+          jumpBtn.textContent = t('reply.jumpAction')
+          jumpBtn.addEventListener('click', function (ev) {
+            ev.preventDefault()
+            ev.stopPropagation()
+            jumpToItem(item, chip, num)
+          })
+          el.appendChild(jumpBtn)
           presentTip(chip, el)
           var r2 = chip.getBoundingClientRect()
           var w2 = 320
@@ -3095,7 +3181,7 @@ window.__ModuleLoader__.load({
         chip.addEventListener('click', function (ev) {
           ev.preventDefault()
           ev.stopPropagation()
-          jumpToItem(item, chip)
+          jumpToItem(item, chip, num)
         })
         return chip
       }
